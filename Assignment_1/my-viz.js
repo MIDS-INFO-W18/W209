@@ -70,6 +70,7 @@ d3.csv("fitbit_january_sleep.csv", function(error,data) {
     layer.selectAll(".stacked")
           .data(function(d) { return d; })
         .enter().append("rect")
+          .attr("class", "stacked")
           .attr("x", function(d) { 
             return xScale(d.data.Date); 
             })
@@ -125,10 +126,9 @@ d3.csv("fitbit_january_sleep.csv", function(error,data) {
 	   .text("8HR Sleep Benchmark");
 
     // Sort Transitions
-d3.select("input").on("change", change);
+    d3.select("input").on("change", change);
 
-    function change() 
-    {
+    function change() {
     //Change if/then: checked will sort values by total, unchecked will be by date
     var x0 = xScale.domain(data.sort(this.checked
         ? function(a, b) { return b.Total - a.Total; } 
@@ -136,7 +136,7 @@ d3.select("input").on("change", change);
         .map(function(d) { return d.Date; }))
         .copy();
 
-    svg.selectAll(".stacked")
+    layer.selectAll(".stacked")
         .sort(function(a, b) {return x0(a.Date) - x0(b.Date); });
 
 
@@ -145,23 +145,22 @@ d3.select("input").on("change", change);
     //I tried initially removing / making the layer object opaque before this but I remember JS is asynchronous.
     //I believe I'm suppose to use .merge(layers) to update the pre-plotted layer object but it doesn't seem to be working
  	layer.selectAll(".stacked")
-          .data(function(d) { return d; })
-		  .enter().append("rect")
+          // .data(function(d) { return d; })
+		  // .enter().append("rect")
 		//.merge(layer)
-          .attr("x", function(d) { 
-            return xScale(d.data.Date); 
-            })
-          .attr("y", function(d) { return yScale(d[1]); })
-          .attr("height", function(d) { return yScale(d[0]) - yScale(d[1]); })
-          .attr("width", xScale.bandwidth())
     
     //Transitions
-    var transition = svg.transition().duration(750),
+    var transition = layer.transition().duration(750),
         delay = function(d, i) { return i * 50; };
 
-    transition.selectAll(".class")
+    transition.selectAll(".stacked")
         .delay(delay)
-        .attr("x", function(d) { return x0(d.Date); });
+        .attr("x", function(d) { return x0(d.data.Date); })
+        .attr("y", function(d) { return yScale(d[1]); })
+        .attr("height", function(d) { return yScale(d[0]) - yScale(d[1]); })
+        .attr("width", x0.bandwidth())
+
+        // .attr("x", function(d) { return x0(d.Date); });
 
     transition.select(".xAxis")
         .call(xAxis)
